@@ -198,6 +198,89 @@ function BandMessageCard({ message, index }) {
   );
 }
 
+function WorkflowMetrics({ workflow }) {
+  if (!workflow) return null;
+
+  const totalAgents = workflow.agents?.length || 0;
+  const totalBandMessages = workflow.bandMessages?.length || 0;
+  const hasRevisionLoop = workflow.agents?.some(
+    (agent) => agent.stage === "revision"
+  );
+
+  const reviewAgent = workflow.agents?.find(
+    (agent) => agent.stage === "review"
+  );
+
+  const finalStatus = workflow.finalPackage?.finalStatus || workflow.status;
+
+  const metrics = [
+    {
+      label: "Agents Collaborated",
+      value: totalAgents,
+      description: "Specialized agents participated in the workflow",
+      accent: "text-cyan-300"
+    },
+    {
+      label: "Band Messages",
+      value: totalBandMessages,
+      description: "Structured collaboration events exchanged",
+      accent: "text-purple-300"
+    },
+    {
+      label: "Review Loop",
+      value: hasRevisionLoop ? "Completed" : "Skipped",
+      description: hasRevisionLoop
+        ? "Reviewer feedback triggered engineering revision"
+        : "No revision was required",
+      accent: hasRevisionLoop ? "text-orange-300" : "text-slate-300"
+    },
+    {
+      label: "Review Status",
+      value: reviewAgent?.output?.reviewStatus || "N/A",
+      description: "Code review decision from reviewer agent",
+      accent: "text-emerald-300"
+    },
+    {
+      label: "Final Status",
+      value: finalStatus,
+      description: "Delivery package readiness state",
+      accent: "text-green-300"
+    }
+  ];
+
+  return (
+    <section className="rounded-[2rem] border border-slate-800 bg-slate-950/70 p-6 shadow-xl shadow-black/20 backdrop-blur md:p-8">
+      <div className="mb-6">
+        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-400">
+          Workflow Summary
+        </p>
+        <h2 className="mt-2 text-2xl font-bold text-white">
+          Multi-Agent Collaboration Metrics
+        </h2>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        {metrics.map((metric) => (
+          <div
+            key={metric.label}
+            className="rounded-3xl border border-slate-800 bg-slate-900/70 p-5"
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+              {metric.label}
+            </p>
+            <p className={`mt-3 text-2xl font-black ${metric.accent}`}>
+              {metric.value}
+            </p>
+            <p className="mt-2 text-xs leading-5 text-slate-400">
+              {metric.description}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function FinalPackage({ finalPackage, workflow }) {
   if (!finalPackage) return null;
 
@@ -433,6 +516,8 @@ function App() {
 
         {workflow && (
           <div className="mt-8 space-y-8">
+            <WorkflowMetrics workflow={workflow} />
+
             <section className="rounded-[2rem] border border-slate-800 bg-slate-950/70 p-6 shadow-xl shadow-black/20 backdrop-blur md:p-8">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>

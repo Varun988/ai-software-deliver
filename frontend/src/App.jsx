@@ -552,8 +552,14 @@ function App() {
                   Review revision loop
                 </StatusPill>
                 <StatusPill className="border-green-400/30 bg-green-500/15 text-green-200">
-                  Mock Band room enabled
+                  
+                  Live Band multi-agent enabled
+
                 </StatusPill>
+
+                <StatusPill className="border-blue-400/30 bg-blue-500/15 text-blue-200">
+                AI/ML API powered
+              </StatusPill>
               </div>
             </div>
 

@@ -1,122 +1,398 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+const sampleRequests = [
+  "Add a dark mode toggle to a React dashboard and persist selected theme across refreshes",
+  "Add search and status filtering to a task management dashboard",
+  "Add client-side validation to a signup form with helpful error messages",
+  "Add export-to-CSV functionality for a reports table"
+];
 
+const stageStyles = {
+  planning: "bg-blue-500/15 text-blue-200 border-blue-400/30",
+  implementation: "bg-purple-500/15 text-purple-200 border-purple-400/30",
+  testing: "bg-amber-500/15 text-amber-200 border-amber-400/30",
+  review: "bg-emerald-500/15 text-emerald-200 border-emerald-400/30",
+  documentation: "bg-pink-500/15 text-pink-200 border-pink-400/30",
+  start: "bg-slate-500/15 text-slate-200 border-slate-400/30",
+  completed: "bg-green-500/15 text-green-200 border-green-400/30"
+};
+
+function JsonBlock({ data }) {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <pre className="mt-4 max-h-96 overflow-auto rounded-2xl border border-slate-700 bg-slate-950/80 p-4 text-xs leading-relaxed text-slate-200">
+      {JSON.stringify(data, null, 2)}
+    </pre>
+  );
 }
 
-export default App
+function StatusPill({ children, className = "" }) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${className}`}
+    >
+      {children}
+    </span>
+  );
+}
+
+function AgentCard({ agent, index }) {
+  const style =
+    stageStyles[agent.stage] ||
+    "bg-slate-500/15 text-slate-200 border-slate-400/30";
+
+  return (
+    <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-5 shadow-xl shadow-slate-950/30">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-cyan-400 text-sm font-bold text-slate-950">
+              {index + 1}
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-white">{agent.agent}</h3>
+              <p className="text-sm text-slate-400">{agent.summary}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <StatusPill className={style}>{agent.stage}</StatusPill>
+          <StatusPill className="border-green-400/30 bg-green-500/15 text-green-200">
+            {agent.status}
+          </StatusPill>
+          <StatusPill className="border-cyan-400/30 bg-cyan-500/15 text-cyan-200">
+            {agent.provider}
+          </StatusPill>
+        </div>
+      </div>
+
+      <JsonBlock data={agent.output} />
+    </div>
+  );
+}
+
+function BandMessageCard({ message, index }) {
+  const style =
+    stageStyles[message.stage] ||
+    "bg-slate-500/15 text-slate-200 border-slate-400/30";
+
+  return (
+    <div className="relative rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
+      <div className="absolute -left-3 top-5 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-400 text-xs font-bold text-slate-950">
+        {index + 1}
+      </div>
+
+      <div className="ml-2 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="font-semibold text-white">{message.agent}</p>
+          <p className="mt-1 text-sm text-slate-300">{message.message}</p>
+          <p className="mt-2 text-xs text-slate-500">{message.createdAt}</p>
+        </div>
+
+        <StatusPill className={style}>{message.stage}</StatusPill>
+      </div>
+    </div>
+  );
+}
+
+function FinalPackage({ finalPackage }) {
+  if (!finalPackage) return null;
+
+  return (
+    <section className="rounded-3xl border border-cyan-400/30 bg-cyan-950/20 p-6 shadow-2xl shadow-cyan-950/20">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">
+            Final Delivery Package
+          </p>
+          <h2 className="mt-2 text-2xl font-bold text-white">
+            PR Package Ready
+          </h2>
+        </div>
+
+        <StatusPill className="border-green-400/30 bg-green-500/15 text-green-200">
+          {finalPackage.finalStatus || "ready"}
+        </StatusPill>
+      </div>
+
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+          <p className="text-sm font-semibold text-slate-400">PR Title</p>
+          <p className="mt-2 text-lg font-semibold text-white">
+            {finalPackage.prTitle}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+          <p className="text-sm font-semibold text-slate-400">Status</p>
+          <p className="mt-2 text-lg font-semibold text-green-300">
+            {finalPackage.finalStatus}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+        <p className="text-sm font-semibold text-slate-400">PR Summary</p>
+        <p className="mt-2 text-sm leading-6 text-slate-200">
+          {finalPackage.prSummary}
+        </p>
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+          <p className="text-sm font-semibold text-slate-400">Release Notes</p>
+          <ul className="mt-3 space-y-2 text-sm text-slate-200">
+            {(finalPackage.releaseNotes || []).map((item, index) => (
+              <li key={index}>• {item}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+          <p className="text-sm font-semibold text-slate-400">Developer Notes</p>
+          <ul className="mt-3 space-y-2 text-sm text-slate-200">
+            {(finalPackage.developerNotes || []).map((item, index) => (
+              <li key={index}>• {item}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+        <p className="text-sm font-semibold text-slate-400">README Update</p>
+        <pre className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-200">
+          {finalPackage.readmeUpdate}
+        </pre>
+      </div>
+    </section>
+  );
+}
+
+function App() {
+  const [featureRequest, setFeatureRequest] = useState(sampleRequests[0]);
+  const [workflow, setWorkflow] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  async function startWorkflow() {
+    setLoading(true);
+    setErrorMessage("");
+    setWorkflow(null);
+
+    try {
+      const response = await fetch("/api/workflows/start", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ featureRequest })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Workflow failed");
+      }
+
+      setWorkflow(data);
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#164e63,transparent_35%),linear-gradient(135deg,#020617,#0f172a_45%,#111827)] px-4 py-8 text-slate-100 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <section className="rounded-[2rem] border border-slate-800 bg-slate-950/70 p-6 shadow-2xl shadow-black/30 backdrop-blur md:p-10">
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div>
+              <div className="inline-flex rounded-full border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-200">
+                Band of Agents Hackathon · Track 2
+              </div>
+
+              <h1 className="mt-6 text-4xl font-black tracking-tight text-white md:text-6xl">
+                DevBand
+              </h1>
+
+              <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-300">
+                A Band-powered multi-agent software delivery team where planner,
+                engineer, tester, reviewer, and documentation agents collaborate
+                to transform a feature request into a PR-ready delivery package.
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                <StatusPill className="border-cyan-400/30 bg-cyan-500/15 text-cyan-200">
+                  5 specialized agents
+                </StatusPill>
+                <StatusPill className="border-purple-400/30 bg-purple-500/15 text-purple-200">
+                  Structured handoffs
+                </StatusPill>
+                <StatusPill className="border-green-400/30 bg-green-500/15 text-green-200">
+                  Mock Band room enabled
+                </StatusPill>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-5">
+              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-400">
+                Agent Workflow
+              </p>
+
+              <div className="mt-5 space-y-3">
+                {[
+                  "Product Planner Agent",
+                  "Software Engineer Agent",
+                  "Test Engineer Agent",
+                  "Code Reviewer Agent",
+                  "Documentation Agent"
+                ].map((agent, index) => (
+                  <div
+                    key={agent}
+                    className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/60 p-3"
+                  >
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-400 text-xs font-bold text-slate-950">
+                      {index + 1}
+                    </div>
+                    <p className="text-sm font-medium text-slate-200">{agent}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-8 rounded-[2rem] border border-slate-800 bg-slate-950/70 p-6 shadow-xl shadow-black/20 backdrop-blur md:p-8">
+          <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+            <div>
+              <label className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-400">
+                Feature Request
+              </label>
+
+              <textarea
+                value={featureRequest}
+                onChange={(event) => setFeatureRequest(event.target.value)}
+                rows={5}
+                className="mt-3 w-full resize-none rounded-3xl border border-slate-700 bg-slate-900 p-5 text-base leading-7 text-white outline-none ring-cyan-400/30 transition focus:border-cyan-400 focus:ring-4"
+                placeholder="Describe the software feature you want DevBand agents to deliver..."
+              />
+
+              {errorMessage && (
+                <div className="mt-4 rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+                  {errorMessage}
+                </div>
+              )}
+
+              <button
+                onClick={startWorkflow}
+                disabled={loading || !featureRequest.trim()}
+                className="mt-5 rounded-2xl bg-cyan-400 px-6 py-3 font-bold text-slate-950 shadow-lg shadow-cyan-950/30 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading ? "Agents collaborating..." : "Start DevBand Workflow"}
+              </button>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-400">
+                Try Examples
+              </p>
+
+              <div className="mt-3 space-y-3">
+                {sampleRequests.map((request) => (
+                  <button
+                    key={request}
+                    onClick={() => setFeatureRequest(request)}
+                    className="w-full rounded-2xl border border-slate-800 bg-slate-900/80 p-3 text-left text-sm leading-6 text-slate-300 transition hover:border-cyan-400/40 hover:bg-slate-800"
+                  >
+                    {request}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {workflow && (
+          <div className="mt-8 space-y-8">
+            <section className="rounded-[2rem] border border-slate-800 bg-slate-950/70 p-6 shadow-xl shadow-black/20 backdrop-blur md:p-8">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-400">
+                    Band Collaboration Room
+                  </p>
+                  <h2 className="mt-2 text-2xl font-bold text-white">
+                    {workflow.bandRoom?.roomName}
+                  </h2>
+                  <p className="mt-2 text-sm text-slate-400">
+                    Room ID: {workflow.bandRoom?.roomId}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <StatusPill className="border-cyan-400/30 bg-cyan-500/15 text-cyan-200">
+                    {workflow.bandRoom?.mode} mode
+                  </StatusPill>
+                  <StatusPill className="border-green-400/30 bg-green-500/15 text-green-200">
+                    {workflow.status}
+                  </StatusPill>
+                </div>
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+                <p className="text-sm font-semibold text-slate-400">
+                  Workflow ID
+                </p>
+                <p className="mt-1 font-mono text-sm text-cyan-200">
+                  {workflow.workflowId}
+                </p>
+              </div>
+            </section>
+
+            <section>
+              <div className="mb-4">
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-400">
+                  Agent Outputs
+                </p>
+                <h2 className="mt-2 text-2xl font-bold text-white">
+                  Multi-Agent Delivery Flow
+                </h2>
+              </div>
+
+              <div className="space-y-5">
+                {workflow.agents?.map((agent, index) => (
+                  <AgentCard key={`${agent.agent}-${index}`} agent={agent} index={index} />
+                ))}
+              </div>
+            </section>
+
+            <section className="rounded-[2rem] border border-slate-800 bg-slate-950/70 p-6 shadow-xl shadow-black/20 backdrop-blur md:p-8">
+              <div className="mb-6">
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-400">
+                  Band Message Timeline
+                </p>
+                <h2 className="mt-2 text-2xl font-bold text-white">
+                  Visible Agent-to-Agent Collaboration
+                </h2>
+              </div>
+
+              <div className="ml-3 space-y-4 border-l border-slate-800 pl-5">
+                {workflow.bandMessages?.map((message, index) => (
+                  <BandMessageCard
+                    key={message.id}
+                    message={message}
+                    index={index}
+                  />
+                ))}
+              </div>
+            </section>
+
+            <FinalPackage finalPackage={workflow.finalPackage} />
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}
+
+export default App;

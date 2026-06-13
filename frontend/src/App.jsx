@@ -178,25 +178,79 @@ function BandMessageCard({ message, index }) {
     stageStyles[message.stage] ||
     "bg-slate-500/15 text-slate-200 border-slate-400/30";
 
+  const isLiveBand = message.liveBand === true;
+
   return (
     <div className="relative rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
       <div className="absolute -left-3 top-5 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-400 text-xs font-bold text-slate-950">
         {index + 1}
       </div>
 
-      <div className="ml-2 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+      <div className="ml-2 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 flex-1">
           <p className="font-semibold text-white">{message.agent}</p>
           <p className="mt-1 text-sm text-slate-300">{message.message}</p>
+
+          <div className="mt-3 grid gap-2 rounded-2xl border border-slate-800 bg-slate-900/70 p-3 text-xs text-slate-300 md:grid-cols-2">
+            <div>
+              <span className="text-slate-500">Posted as:</span>{" "}
+              <span className="font-semibold text-cyan-200">
+                {message.postedAs || message.agent}
+              </span>
+            </div>
+
+            <div>
+              <span className="text-slate-500">Band role:</span>{" "}
+              <span className="font-semibold text-purple-200">
+                {message.bandAgentRole || "local"}
+              </span>
+            </div>
+
+            {message.bandAgentHandle && (
+              <div className="md:col-span-2">
+                <span className="text-slate-500">Band handle:</span>{" "}
+                <span className="font-mono text-cyan-200">
+                  {message.bandAgentHandle}
+                </span>
+              </div>
+            )}
+
+            {message.bandAgentId && (
+              <div className="md:col-span-2">
+                <span className="text-slate-500">Band agent ID:</span>{" "}
+                <span className="font-mono text-[11px] text-slate-400">
+                  {message.bandAgentId}
+                </span>
+              </div>
+            )}
+          </div>
+
           <p className="mt-2 text-xs text-slate-500">{message.createdAt}</p>
         </div>
 
-        <StatusPill className={style}>{message.stage}</StatusPill>
+        <div className="flex flex-wrap gap-2">
+          <StatusPill className={style}>{message.stage}</StatusPill>
+
+          <StatusPill
+            className={
+              isLiveBand
+                ? "border-green-400/30 bg-green-500/15 text-green-200"
+                : "border-slate-400/30 bg-slate-500/15 text-slate-200"
+            }
+          >
+            {isLiveBand ? "Live Band" : "Local"}
+          </StatusPill>
+
+          {message.bandSuccess && (
+            <StatusPill className="border-cyan-400/30 bg-cyan-500/15 text-cyan-200">
+              Band success
+            </StatusPill>
+          )}
+        </div>
       </div>
     </div>
   );
 }
-
 function WorkflowMetrics({ workflow }) {
   if (!workflow) return null;
 
@@ -620,6 +674,46 @@ function App() {
                   {workflow.workflowId}
                 </p>
               </div>
+{workflow.bandRoom?.participants?.length > 0 && (
+  <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p className="text-sm font-semibold text-slate-400">
+          Band Specialist Agents
+        </p>
+        <p className="mt-1 text-xs text-slate-500">
+          Specialist Band agents added as participants to this workflow room.
+        </p>
+      </div>
+
+      <StatusPill className="border-purple-400/30 bg-purple-500/15 text-purple-200">
+        {workflow.bandRoom.participants.length} participants
+      </StatusPill>
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {workflow.bandRoom.participants.map((participant) => (
+            <div
+              key={participant.id}
+              className="rounded-2xl border border-slate-800 bg-slate-900/70 p-3"
+            >
+              <p className="text-sm font-semibold text-white">
+                {participant.displayName}
+              </p>
+              <p className="mt-1 text-xs text-purple-200">
+                Role: {participant.role}
+              </p>
+              {participant.handle && (
+                <p className="mt-1 break-all font-mono text-xs text-cyan-200">
+                  {participant.handle}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
             </section>
 
             <section>

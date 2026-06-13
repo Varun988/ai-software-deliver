@@ -321,7 +321,7 @@ function WorkflowMetrics({ workflow }) {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
               {metric.label}
             </p>
-            <p className={`mt-3 text-2xl font-black ${metric.accent}`}>
+            <p className={`mt-3 break-words text-xl font-black leading-tight ${metric.accent}`}>
               {metric.value}
             </p>
             <p className="mt-2 text-xs leading-5 text-slate-400">
@@ -373,14 +373,15 @@ function BandUsageExplanation() {
           How DevBand Uses Band
         </h2>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
-          In the current MVP, DevBand runs in mock Band mode while preserving the
-          same collaboration structure we will connect to the live Band platform:
-          room creation, structured messages, agent handoffs, review decisions,
-          and an audit-ready workflow timeline.
+          DevBand now runs in live Band multi-agent mode. For every workflow,
+          DevBand creates a real Band collaboration room, adds specialist Band
+          agents as participants, records structured task events, tracks handoffs,
+          captures review decisions, and maintains an audit-ready workflow
+          timeline.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
         {bandPoints.map((point, index) => (
           <div
             key={point.title}

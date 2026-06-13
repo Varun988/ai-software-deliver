@@ -1,186 +1,203 @@
 # DevBand: Band-Powered Multi-Agent Software Delivery Team
 
-DevBand is a full-stack hackathon project for the **Band of Agents Hackathon**. It demonstrates a cross-framework, multi-agent software delivery workflow where specialized AI agents collaborate through **Band** to convert a software feature request into a PR-ready delivery package.
+DevBand is a full-stack Band of Agents Hackathon project that demonstrates an enterprise-style multi-agent software delivery workflow. It uses **Band** as the shared collaboration layer and **AI/ML API** as the model provider to coordinate multiple specialized software delivery agents.
 
-The project focuses on **Track 2: Multi-Agent Software Development**.
-
----
-
-## 1. Short Description
-
-DevBand uses **Band** as the collaboration layer and **AI/ML API** as the model provider to coordinate a software delivery team of specialized agents. The agents plan, implement, test, review, revise, and document a requested software feature while preserving structured context handoffs and an audit-ready collaboration timeline.
+The project is designed for **Track 2: Multi-Agent Software Development**.
 
 ---
 
-## 2. Problem Statement
+## Table of Contents
 
-Modern AI coding tools often operate as isolated assistants. Enterprise software delivery, however, is collaborative. A feature request usually moves through multiple roles:
-
-- Product planning
-- Engineering implementation
-- Testing
-- Code review
-- Revision
-- Documentation
-- Release preparation
-
-DevBand demonstrates what becomes possible when these roles are represented by specialized AI agents that coordinate through a shared collaboration layer instead of acting as one large monolithic chatbot.
+1. [Project Summary](#project-summary)
+2. [Problem Statement](#problem-statement)
+3. [Solution Overview](#solution-overview)
+4. [Why This Is Multi-Agent](#why-this-is-multi-agent)
+5. [How DevBand Uses Band](#how-devband-uses-band)
+6. [Agent Team](#agent-team)
+7. [End-to-End Workflow](#end-to-end-workflow)
+8. [Architecture](#architecture)
+9. [Technology Stack](#technology-stack)
+10. [Repository Structure](#repository-structure)
+11. [Environment Variables](#environment-variables)
+12. [Cost Guard Strategy](#cost-guard-strategy)
+13. [Local Development](#local-development)
+14. [GitHub Codespaces Development](#github-codespaces-development)
+15. [API Endpoints](#api-endpoints)
+16. [Testing with curl](#testing-with-curl)
+17. [Frontend Demo Flow](#frontend-demo-flow)
+18. [Deployment Guide](#deployment-guide)
+19. [Hackathon Submission Content](#hackathon-submission-content)
+20. [Demo Script](#demo-script)
+21. [Known Limitations](#known-limitations)
+22. [Future Improvements](#future-improvements)
+23. [Safety and Reliability](#safety-and-reliability)
+24. [License](#license)
+25. [Credits](#credits)
 
 ---
 
-## 3. Solution Overview
+## Project Summary
 
-A user submits a feature request, such as:
+**DevBand** turns a software feature request into a structured PR-ready delivery package by coordinating multiple specialized agents through Band.
+
+A user enters a request such as:
 
 ```text
 Add a dark mode toggle to a React dashboard and persist selected theme across refreshes.
 ```
 
-DevBand then creates a Band collaboration room and runs a multi-agent workflow:
+DevBand then runs a multi-agent software delivery flow:
 
 ```text
 Feature Request
-   ↓
-Product Planner Agent
-   ↓
-Software Engineer Agent
-   ↓
-Test Engineer Agent
-   ↓
-Code Reviewer Agent
-   ↓
-Software Engineer Revision Agent
-   ↓
-Documentation Agent
-   ↓
-Final PR Delivery Package
+  -> Product Planner Agent
+  -> Software Engineer Agent
+  -> Test Engineer Agent
+  -> Code Reviewer Agent
+  -> Software Engineer Revision Agent
+  -> Documentation Agent
+  -> Final PR Delivery Package
 ```
 
-Each agent receives the structured output from earlier agents, performs a specialized task, and posts its result into the Band-powered collaboration timeline.
+Each stage produces structured context that is handed off to the next agent. DevBand records the workflow in a live Band collaboration room and produces a downloadable Markdown PR package.
 
 ---
 
-## 4. Key Features
+## Problem Statement
 
-### Multi-Agent Software Delivery Workflow
+AI coding assistants are powerful, but many operate as isolated single-agent tools. Real software delivery in enterprises is collaborative and usually includes planning, implementation, testing, review, revision, documentation, and release preparation.
 
-DevBand includes six software delivery stages:
-
-1. Product planning
-2. Implementation design
-3. Test planning
-4. Code review
-5. Engineering revision
-6. Documentation and release preparation
-
-### Live Band Integration
-
-DevBand connects to Band using the Band Agent REST API. It creates a real Band chat room and records each agent handoff as a Band event.
-
-### Real AI/ML API Integration
-
-DevBand uses AI/ML API through an OpenAI-compatible chat completions endpoint to generate agent outputs.
-
-### Review-Driven Revision Loop
-
-The Code Reviewer Agent can approve with suggestions, which triggers a Software Engineer Revision Agent before documentation is finalized.
-
-### Downloadable PR Package
-
-The frontend can export the completed delivery package as a Markdown file containing:
-
-- Feature request
-- Workflow details
-- Band room details
-- Agent outputs
-- Band collaboration timeline
-- Final PR title
-- PR summary
-- Release notes
-- README update
-
-### Cost Guard Logic
-
-The backend includes safeguards to reduce unnecessary AI spending:
-
-- Economical default model
-- Output token limit
-- Prompt length limit
-- Daily/session request limit
-- In-memory cache
-- Mock fallback mode
+DevBand addresses this gap by creating a coordinated agent team where each agent has a specific software delivery responsibility. Band acts as the collaboration layer where the workflow room, participants, structured handoffs, task events, review decisions, and final delivery trail are recorded.
 
 ---
 
-## 5. Agent Roles
+## Solution Overview
 
-### 5.1 Product Planner Agent
+DevBand is a full-stack web application with:
 
-Converts the user's raw feature request into a structured delivery plan.
+- A React frontend for entering feature requests and viewing the workflow.
+- A Node.js/Express backend for orchestrating the agents.
+- AI/ML API integration for generating agent outputs.
+- Band Agent API integration for live collaboration rooms, participants, and task events.
+- A downloadable Markdown PR package for final developer handoff.
 
-Produces:
+The result is an auditable software delivery artifact showing how multiple agents collaborated from feature request to PR-ready package.
+
+---
+
+## Why This Is Multi-Agent
+
+DevBand is not a single chatbot. DevBand uses a team of specialized agents with separate responsibilities and separate workflow stages.
+
+The current implementation supports two levels of multi-agent behavior:
+
+### 1. Logical Agent Collaboration
+
+The backend runs six logical software delivery agents:
+
+1. Product Planner Agent
+2. Software Engineer Agent
+3. Test Engineer Agent
+4. Code Reviewer Agent
+5. Software Engineer Revision Agent
+6. Documentation Agent
+
+Each logical agent receives structured context from previous stages and produces structured output for the next stage.
+
+### 2. Band Multi-Agent Identity Mode
+
+DevBand can run in **Band multi-agent identity mode**, where a coordinator Band agent creates a room and six specialist Band agents are added as room participants.
+
+The specialist Band agents are:
+
+1. DevBand Planner Agent
+2. DevBand Engineer Agent
+3. DevBand Tester Agent
+4. DevBand Reviewer Agent
+5. DevBand Revision Agent
+6. DevBand Documentation Agent
+
+Each stage event is posted to Band under the matching specialist agent identity.
+
+---
+
+## How DevBand Uses Band
+
+Band is central to DevBand. DevBand uses Band as the workflow collaboration layer, not just a final notification channel.
+
+In live Band mode, DevBand performs these actions:
+
+1. Creates a real Band collaboration room for every workflow.
+2. Adds specialist Band agents as participants in the room.
+3. Posts a workflow start event.
+4. Posts each agent output as a structured Band task event.
+5. Records task handoffs, review decisions, revision activity, and final completion.
+6. Displays the Band room, participants, task events, Band roles, handles, and success status in the frontend.
+
+The workflow timeline becomes an audit trail showing how the feature request moved across planning, implementation, testing, review, revision, and documentation.
+
+---
+
+## Agent Team
+
+### Workflow Controller / Coordinator
+
+The coordinator creates the Band room, adds specialist agents as participants, starts the workflow, and posts the final completion event.
+
+### Product Planner Agent
+
+Converts the feature request into:
 
 - User story
 - Acceptance criteria
 - Technical tasks
 - Risks
-- Handoff instruction for the Software Engineer Agent
+- Handoff instruction
 
-### 5.2 Software Engineer Agent
+### Software Engineer Agent
 
-Creates an implementation approach based on the planner output.
-
-Produces:
+Creates implementation guidance including:
 
 - Files changed
 - Implementation summary
-- React code snippet
+- Code snippet
 - Assumptions
-- Handoff instruction for the Test Engineer Agent
+- Handoff instruction
 
-### 5.3 Test Engineer Agent
+### Test Engineer Agent
 
-Creates validation plans for the generated implementation.
-
-Produces:
+Creates validation plans including:
 
 - Unit test ideas
 - Integration test ideas
 - Manual QA checklist
 - Edge cases
-- Handoff instruction for the Code Reviewer Agent
+- Handoff instruction
 
-### 5.4 Code Reviewer Agent
+### Code Reviewer Agent
 
-Reviews the implementation and testing strategy.
+Reviews the plan, implementation, and testing outputs for:
 
-Produces:
-
-- Review status
-- Quality score
-- Maintainability feedback
-- Accessibility feedback
-- Security feedback
+- Quality
+- Maintainability
+- Accessibility
+- Security
 - Blocking issues
 - Revision decision
 
-### 5.5 Software Engineer Revision Agent
+### Software Engineer Revision Agent
 
-Handles review feedback and improves the implementation.
-
-Produces:
+Handles reviewer suggestions and produces:
 
 - Revision summary
 - Changes applied
 - Revised code snippet
 - Resolved review items
-- Handoff instruction for the Documentation Agent
+- Handoff instruction
 
-### 5.6 Documentation Agent
+### Documentation Agent
 
-Creates the final PR-ready delivery package.
-
-Produces:
+Creates the final delivery package including:
 
 - PR title
 - PR summary
@@ -191,41 +208,65 @@ Produces:
 
 ---
 
-## 6. Architecture
+## End-to-End Workflow
 
 ```text
-React Frontend
-   │
-   │ POST /api/workflows/start
-   ▼
-Node.js / Express Backend
-   │
-   ├── Workflow Service
-   │      ├── Product Planner Agent
-   │      ├── Software Engineer Agent
-   │      ├── Test Engineer Agent
-   │      ├── Code Reviewer Agent
-   │      ├── Software Engineer Revision Agent
-   │      └── Documentation Agent
-   │
-   ├── Model Service
-   │      └── AI/ML API
-   │
-   └── Band Service
-          └── Band Agent API
-               ├── Create chat room
-               └── Create task events
+1. User enters a feature request.
+2. Backend creates a Band room.
+3. Backend adds six specialist Band agents as participants.
+4. Workflow Controller posts the workflow start event.
+5. Product Planner Agent creates a structured delivery plan.
+6. Software Engineer Agent creates implementation guidance.
+7. Test Engineer Agent creates test and QA guidance.
+8. Code Reviewer Agent reviews output and produces feedback.
+9. Software Engineer Revision Agent resolves review suggestions.
+10. Documentation Agent creates the final PR package.
+11. Workflow Controller posts the completion event.
+12. Frontend displays metrics, agent outputs, Band timeline, and final package.
+13. User downloads the PR package as Markdown.
 ```
 
 ---
 
-## 7. Technology Stack
+## Architecture
+
+```text
+React + Vite Frontend
+  |
+  | POST /api/workflows/start
+  v
+Node.js + Express Backend
+  |
+  |-- Workflow Service
+  |     |-- Product Planner Agent
+  |     |-- Software Engineer Agent
+  |     |-- Test Engineer Agent
+  |     |-- Code Reviewer Agent
+  |     |-- Software Engineer Revision Agent
+  |     |-- Documentation Agent
+  |
+  |-- Model Service
+  |     |-- AI/ML API
+  |     |-- Cost guards
+  |     |-- Mock fallback
+  |
+  |-- Band Service
+        |-- Create Band room
+        |-- Add specialist Band participants
+        |-- Post Band task events
+        |-- Fallback to local timeline if needed
+```
+
+---
+
+## Technology Stack
 
 ### Frontend
 
 - React
 - Vite
 - Tailwind CSS
+- Browser-based Markdown export
 
 ### Backend
 
@@ -235,34 +276,38 @@ Node.js / Express Backend
 - dotenv
 - Nodemon for development
 
-### AI Provider
+### AI
 
 - AI/ML API
-- OpenAI-compatible chat completions format
+- OpenAI-compatible chat completions endpoint
 - Recommended default model: `gpt-4o-mini`
 
 ### Collaboration Layer
 
 - Band Agent API
 - Live Band chat room creation
-- Band task events for agent outputs and structured handoffs
+- Specialist Band participant addition
+- Band task events for structured handoffs
 
-### Hosting Plan
+### Deployment Target
 
 - Frontend: Vercel
 - Backend: Render
 
 ---
 
-## 8. Repository Structure
+## Repository Structure
 
 ```text
-devband/
+ai-software-deliver/
   frontend/
     src/
+      config/
+        api.js
       App.jsx
       index.css
       main.jsx
+    .env.example
     package.json
     vite.config.js
 
@@ -290,7 +335,7 @@ devband/
 
 ---
 
-## 9. Environment Variables
+## Environment Variables
 
 Create this file locally:
 
@@ -298,22 +343,53 @@ Create this file locally:
 backend/.env
 ```
 
-Use the following structure:
+Use this structure:
 
 ```env
 PORT=5000
+FRONTEND_URL=http://localhost:5173
 
 AGENT_MODE=ai
 BAND_MODE=live
+BAND_MULTI_AGENT_MODE=true
 
-BAND_API_KEY=your_band_api_key_here
-BAND_AGENT_ID=your_band_agent_id_here
-BAND_AGENT_HANDLE=your_band_agent_handle_here
+BAND_API_KEY=your_coordinator_api_key
+BAND_AGENT_ID=your_coordinator_agent_id
+BAND_AGENT_HANDLE=your_coordinator_handle
+
+BAND_COORDINATOR_API_KEY=your_coordinator_api_key
+BAND_COORDINATOR_AGENT_ID=your_coordinator_agent_id
+BAND_COORDINATOR_AGENT_HANDLE=your_coordinator_handle
+
+BAND_PLANNER_API_KEY=your_planner_api_key
+BAND_PLANNER_AGENT_ID=your_planner_agent_id
+BAND_PLANNER_AGENT_HANDLE=your_planner_handle
+
+BAND_ENGINEER_API_KEY=your_engineer_api_key
+BAND_ENGINEER_AGENT_ID=your_engineer_agent_id
+BAND_ENGINEER_AGENT_HANDLE=your_engineer_handle
+
+BAND_TESTER_API_KEY=your_tester_api_key
+BAND_TESTER_AGENT_ID=your_tester_agent_id
+BAND_TESTER_AGENT_HANDLE=your_tester_handle
+
+BAND_REVIEWER_API_KEY=your_reviewer_api_key
+BAND_REVIEWER_AGENT_ID=your_reviewer_agent_id
+BAND_REVIEWER_AGENT_HANDLE=your_reviewer_handle
+
+BAND_REVISION_API_KEY=your_revision_api_key
+BAND_REVISION_AGENT_ID=your_revision_agent_id
+BAND_REVISION_AGENT_HANDLE=your_revision_handle
+
+BAND_DOCS_API_KEY=your_docs_api_key
+BAND_DOCS_AGENT_ID=your_docs_agent_id
+BAND_DOCS_AGENT_HANDLE=your_docs_handle
+
 BAND_WORKSPACE_ID=
 BAND_REST_URL=https://app.band.ai
 BAND_WS_URL=wss://app.band.ai/api/v1/socket/websocket
 
-AIML_API_KEY=your_aiml_api_key_here
+AIML_API_KEY=your_aiml_api_key
 AIML_BASE_URL=https://api.aimlapi.com/v1
 AIML_MODEL=gpt-4o-mini
 AIML_MAX_OUTPUT_TOKENS=700
@@ -325,61 +401,78 @@ FEATHERLESS_BASE_URL=https://api.featherless.ai/v1
 FEATHERLESS_MODEL=Qwen/Qwen2.5-7B-Instruct
 ```
 
-### Important Security Note
+Create this file for frontend deployment documentation:
 
-Never commit `backend/.env`.
+```text
+frontend/.env.example
+```
 
-The project `.gitignore` should include:
+```env
+VITE_API_BASE_URL=
+```
 
-```gitignore
-.env
-backend/.env
-frontend/.env
-node_modules
-dist
+For Vercel deployment, set:
+
+```env
+VITE_API_BASE_URL=https://your-render-backend-url.onrender.com
 ```
 
 ---
 
-## 10. Modes
+## Environment Modes
 
-### Mock Agent Mode
-
-Use mock output without spending AI credits:
+### Mock AI Mode
 
 ```env
 AGENT_MODE=mock
 ```
 
-### AI Agent Mode
+Use this mode while developing UI to avoid spending AI credits.
 
-Use AI/ML API for real agent outputs:
+### Real AI Mode
 
 ```env
 AGENT_MODE=ai
 ```
 
-### Mock Band Mode
+Use this mode when testing real agent outputs.
 
-Use local mock Band timeline:
+### Mock Band Mode
 
 ```env
 BAND_MODE=mock
 ```
 
-### Live Band Mode
+Use this mode if Band credentials are unavailable.
 
-Create real Band rooms and task events:
+### Live Band Mode
 
 ```env
 BAND_MODE=live
 ```
 
+Use this mode to create real Band rooms and events.
+
+### Multi-Agent Band Identity Mode
+
+```env
+BAND_MULTI_AGENT_MODE=true
+```
+
+Use this mode to add specialist Band agents as participants and post events using specialist agent identities.
+
 ---
 
-## 11. Cost Guard Configuration
+## Cost Guard Strategy
 
-DevBand includes basic cost protection for AI usage.
+One DevBand workflow can use approximately six AI calls:
+
+1. Planner
+2. Engineer
+3. Tester
+4. Reviewer
+5. Revision
+6. Documentation
 
 Recommended development settings:
 
@@ -390,49 +483,42 @@ AIML_MAX_PROMPT_CHARS=12000
 AIML_DAILY_REQUEST_LIMIT=12
 ```
 
-Why this matters:
-
-- One workflow uses approximately six AI calls.
-- `AIML_DAILY_REQUEST_LIMIT=12` allows roughly two full AI workflows per backend session/day counter.
-- Use `AGENT_MODE=mock` while testing UI changes repeatedly.
-- Increase the request limit only for final demo testing.
-
-For final demo, a possible setting is:
+Recommended final demo setting:
 
 ```env
 AIML_DAILY_REQUEST_LIMIT=60
 ```
 
+The backend also includes:
+
+- Prompt trimming
+- Output token limits
+- In-memory cache
+- Mock fallback after API failure
+- Mock fallback after request-limit exhaustion
+
 ---
 
-## 12. Local Development Setup
+## Local Development
 
-### 12.1 Clone the Repository
-
-```bash
-git clone <your-repository-url>
-cd devband
-```
-
-### 12.2 Install Backend Dependencies
+### Install Backend
 
 ```bash
 cd backend
 npm install
 ```
 
-### 12.3 Install Frontend Dependencies
+### Install Frontend
 
 ```bash
-cd ../frontend
+cd frontend
 npm install
 ```
 
-### 12.4 Start Backend
-
-From the `backend` folder:
+### Run Backend
 
 ```bash
+cd backend
 npm run dev
 ```
 
@@ -442,11 +528,10 @@ Backend runs on:
 http://localhost:5000
 ```
 
-### 12.5 Start Frontend
-
-From the `frontend` folder:
+### Run Frontend
 
 ```bash
+cd frontend
 npm run dev -- --host 0.0.0.0
 ```
 
@@ -458,11 +543,9 @@ http://localhost:5173
 
 ---
 
-## 13. GitHub Codespaces Setup
+## GitHub Codespaces Development
 
-If using GitHub Codespaces:
-
-1. Open the repository in Codespaces.
+1. Open the repository in GitHub Codespaces.
 2. Start backend in one terminal:
 
 ```bash
@@ -477,12 +560,12 @@ cd frontend
 npm run dev -- --host 0.0.0.0
 ```
 
-4. Open the forwarded port `5173` for the frontend.
-5. Make sure backend port `5000` is also running.
+4. Open forwarded port `5173`.
+5. Ensure port `5000` is also running.
 
 ---
 
-## 14. API Endpoints
+## API Endpoints
 
 ### Health Check
 
@@ -499,7 +582,8 @@ Example response:
   "message": "Multi-agent software delivery backend is live",
   "mode": {
     "agentMode": "ai",
-    "bandMode": "live"
+    "bandMode": "live",
+    "bandMultiAgentMode": "true"
   }
 }
 ```
@@ -510,7 +594,7 @@ Example response:
 POST /api/workflows/start
 ```
 
-Request body:
+Request:
 
 ```json
 {
@@ -518,18 +602,18 @@ Request body:
 }
 ```
 
-Successful response includes:
+Response includes:
 
 - Workflow ID
-- Feature request
 - Band room details
+- Specialist Band participants
 - Agent outputs
-- Band message/event timeline
+- Band event timeline
 - Final PR package
 
 ---
 
-## 15. Test with curl
+## Testing with curl
 
 ```bash
 curl -X POST http://localhost:5000/api/workflows/start \
@@ -537,17 +621,22 @@ curl -X POST http://localhost:5000/api/workflows/start \
   -d "{\"featureRequest\":\"Add a dark mode toggle to a React dashboard and persist selected theme across refreshes\"}"
 ```
 
-Expected indicators for successful AI and Band integration:
+Successful indicators:
 
 ```json
 "provider": "AI/ML API"
 ```
 
 ```json
-"bandRoom": {
-  "mode": "live",
-  "liveBand": true
-}
+"liveBand": true
+```
+
+```json
+"multiAgentMode": true
+```
+
+```json
+"bandAgentRole": "planner"
 ```
 
 ```json
@@ -556,136 +645,101 @@ Expected indicators for successful AI and Band integration:
 
 ---
 
-## 16. Frontend Demo Flow
+## Frontend Demo Flow
 
-1. Open the DevBand frontend.
-2. Enter or select a feature request.
+1. Open DevBand.
+2. Enter a feature request.
 3. Click **Start DevBand Workflow**.
-4. Review the **Workflow Summary** metrics.
-5. Review **How DevBand Uses Band**.
-6. Inspect the live Band collaboration room details.
-7. Inspect each agent output.
-8. Review the Band message timeline.
-9. Review the final PR package.
-10. Click **Download PR Package** to export the generated Markdown delivery artifact.
+4. Review the workflow summary metrics.
+5. Review the Band coordination explanation.
+6. Confirm live Band room details.
+7. Confirm six specialist Band participants.
+8. Review each agent output.
+9. Review the Band message timeline.
+10. Confirm each timeline item shows Band role, handle, and success status.
+11. Review the final PR package.
+12. Download the Markdown PR package.
 
 ---
 
-## 17. How DevBand Uses Band
+## Current UI Notes
 
-DevBand uses Band as the collaboration and coordination layer.
+The current UI includes:
 
-In live mode, DevBand:
+- Hero section with live Band multi-agent and AI/ML API badges.
+- Workflow summary metrics.
+- Band coordination explanation.
+- Live Band room details.
+- Specialist Band participants display.
+- Agent output cards.
+- Band message timeline with agent identity metadata.
+- Final PR package export.
 
-1. Creates a real Band chat room for each workflow.
-2. Posts the workflow start event to Band.
-3. Posts each agent output as a structured Band task event.
-4. Records agent handoffs and review decisions in the Band timeline.
-5. Posts a workflow completion event after the final PR package is generated.
-
-The current implementation uses Band events instead of normal text messages because the DevBand workflow is recording structured task activity rather than routing conversational messages to another participant.
-
----
-
-## 18. Why Band Is Central to This Project
-
-Band is not used only as a notification channel. DevBand uses Band as the shared collaboration layer where each step of the software delivery workflow is recorded.
-
-Each agent output becomes part of the workflow state:
-
-- Planner output informs Engineer output.
-- Engineer output informs Tester output.
-- Tester output informs Reviewer output.
-- Reviewer output triggers Revision output.
-- Revision output informs Documentation output.
-
-The Band timeline acts as the audit trail for these handoffs.
+If a metric value is visually long, such as `approved_with_suggestions` or `ready_for_submission`, the UI may need small responsive styling improvements before final recording.
 
 ---
 
-## 19. Example Final Output
+## Deployment Guide
 
-A completed DevBand workflow produces a PR-style package:
+### Backend: Render
 
-```text
-PR Title: Implement user-requested frontend feature with persistent state
+Create a new Render Web Service.
 
-PR Summary:
-This pull request implements the requested feature and includes planning,
-implementation, tests, review feedback, revision handling, and release notes.
-
-Release Notes:
-- Added a new user-facing feature control.
-- Added persistence-friendly behavior for user preference.
-- Prepared test scenarios and QA checklist.
-- Completed code review with no blocking issues.
-- Resolved review suggestions through a revision handoff.
-
-Final Status:
-ready_for_submission
-```
-
----
-
-## 20. Deployment Plan
-
-### Backend Deployment: Render
-
-1. Create a new Web Service on Render.
-2. Connect the GitHub repository.
-3. Set root directory:
+Settings:
 
 ```text
-backend
+Root Directory: backend
+Build Command: npm install
+Start Command: npm start
 ```
 
-4. Build command:
+Add all backend environment variables in Render dashboard.
 
-```bash
-npm install
-```
-
-5. Start command:
-
-```bash
-npm start
-```
-
-6. Add environment variables from `backend/.env` in Render dashboard.
-7. Do not upload or commit `.env`.
-
-### Frontend Deployment: Vercel
-
-1. Import the GitHub repository in Vercel.
-2. Set root directory:
-
-```text
-frontend
-```
-
-3. Build command:
-
-```bash
-npm run build
-```
-
-4. Output directory:
-
-```text
-dist
-```
-
-5. Add frontend environment variable if required:
+Recommended Render settings for demo:
 
 ```env
-VITE_API_BASE_URL=https://your-render-backend-url
+AGENT_MODE=ai
+BAND_MODE=live
+BAND_MULTI_AGENT_MODE=true
+AIML_DAILY_REQUEST_LIMIT=60
 ```
 
-6. Update frontend API calls if deploying with a separate backend domain.
+After Render deployment, test:
+
+```text
+https://your-render-backend-url.onrender.com
+```
+
+### Frontend: Vercel
+
+Import the repository into Vercel.
+
+Settings:
+
+```text
+Root Directory: frontend
+Framework: Vite
+Build Command: npm run build
+Output Directory: dist
+```
+
+Set this Vercel environment variable:
+
+```env
+VITE_API_BASE_URL=https://your-render-backend-url.onrender.com
+```
+
+After Vercel deploys, update Render with:
+
+```env
+FRONTEND_URL=https://your-vercel-url.vercel.app
+```
+
+Restart the Render backend service after updating `FRONTEND_URL`.
 
 ---
 
-## 21. Hackathon Submission Details
+## Hackathon Submission Content
 
 ### Project Title
 
@@ -696,24 +750,24 @@ DevBand: Band-Powered Multi-Agent Software Delivery Team
 ### Short Description
 
 ```text
-DevBand uses Band and AI/ML API to coordinate specialized software delivery agents that transform a feature request into a planned, implemented, tested, reviewed, revised, and documented PR package.
+DevBand uses Band and AI/ML API to coordinate specialist software delivery agents that transform a feature request into a planned, implemented, tested, reviewed, revised, and documented PR package.
 ```
 
 ### Long Description
 
 ```text
-DevBand is a Band-powered multi-agent software delivery workflow for enterprise engineering teams. A user submits a feature request, and specialized agents collaborate through Band to plan the change, generate an implementation approach, create tests, review quality and security, apply revision feedback, and produce a final PR-ready delivery package. AI/ML API powers the reasoning and generation for each agent, while Band records the collaboration room, structured handoffs, review decisions, and workflow timeline. The result is an auditable, downloadable software delivery artifact that demonstrates how agents can coordinate across the software development lifecycle.
+DevBand is a Band-powered multi-agent software delivery workflow for enterprise engineering teams. A user submits a feature request, and DevBand creates a live Band collaboration room, adds specialist Band agents as participants, and coordinates a software delivery workflow across planning, implementation, testing, review, revision, and documentation. AI/ML API powers each agent's reasoning and generation, while Band records the shared room, participant identities, structured task events, handoffs, review decisions, and workflow completion. The final output is an auditable, downloadable PR-ready delivery package.
 ```
 
 ### Suggested Tags
 
 ```text
 Band
+AI/ML API
 Multi-Agent
-AI Agents
 Software Development
 Developer Tools
-AI/ML API
+AI Agents
 React
 Node.js
 Express
@@ -726,78 +780,80 @@ Documentation
 
 ---
 
-## 22. Demo Script
+## Demo Script
 
 ### Opening
 
 ```text
-DevBand is a Band-powered multi-agent software delivery team. Instead of using one AI assistant to answer a prompt, DevBand coordinates specialized agents through Band to move a feature request across planning, implementation, testing, review, revision, and documentation.
+DevBand is a Band-powered multi-agent software delivery team. Instead of using one AI assistant to answer a prompt, DevBand creates a live Band collaboration room and coordinates specialist agents across the software delivery lifecycle.
 ```
 
-### Demo Steps
+### Walkthrough
 
-1. Show the feature request input.
-2. Submit a sample feature request.
-3. Show the workflow summary metrics.
-4. Show that a live Band room was created.
-5. Show each agent output.
+1. Show the input screen and describe the feature request.
+2. Click Start DevBand Workflow.
+3. Show the workflow metrics.
+4. Show live Band room and specialist participants.
+5. Show agent outputs from planner, engineer, tester, reviewer, revision, and documentation agents.
 6. Show the reviewer-driven revision loop.
-7. Show the Band message timeline.
+7. Show the Band timeline and point out different Band roles and handles.
 8. Show the final PR package.
 9. Download the Markdown PR package.
-10. Open Band dashboard and show the created room/events if available.
+10. Optionally open Band dashboard and show the created room/events.
 
 ### Closing
 
 ```text
-DevBand demonstrates how enterprise software delivery can move beyond isolated coding assistants into coordinated multi-agent workflows. Band provides the shared collaboration layer, AI/ML API powers each specialized agent, and the final output is an auditable PR-ready delivery package.
+DevBand demonstrates how enterprise software delivery can move beyond isolated coding assistants into coordinated multi-agent workflows. Band provides the collaboration layer, AI/ML API powers the specialist agents, and the final output is an auditable PR-ready delivery artifact.
 ```
 
 ---
 
-## 23. Known Limitations
+## Known Limitations
 
-- The current implementation uses one Band remote agent as the workflow coordinator while the backend runs six logical software delivery agents.
-- Band events are used for structured workflow activity; future versions can add multiple individual Band remote agents.
-- The generated code snippets are illustrative and not automatically committed to GitHub.
+- Specialist Band agents are currently represented through Band identities and event posting. They are not separate deployed WebSocket runtimes yet.
+- Generated code is illustrative and is not automatically committed to GitHub.
 - GitHub PR creation is not yet automated.
-- AI model outputs may occasionally include escaped JSX entities; a future cleanup step can decode or sanitize these outputs.
+- There is no persistent database for workflow history.
+- UI metric cards may need additional responsive styling for long status values.
+- The project currently uses Band task events rather than routed text messages with mentions.
 
 ---
 
-## 24. Future Improvements
+## Future Improvements
 
-- Create six separate Band remote agents, one for each software delivery role.
-- Add GitHub issue and pull request integration.
-- Add real repository context ingestion.
-- Add generated file diffs instead of standalone snippets.
-- Add human approval step before final PR package.
-- Add WebSocket-based live progress streaming.
+- Run each specialist Band agent as a separate remote process with WebSocket event handling.
+- Add GitHub issue and PR creation.
+- Add repository context ingestion.
+- Generate real file diffs.
+- Add human approval before final package.
+- Add persistent database storage for workflow history.
+- Add WebSocket streaming for live frontend progress.
 - Add model selection per agent.
 - Add Featherless AI as an optional independent reviewer model.
-- Add persistent database storage for workflow history.
-- Add user authentication and team workspaces.
+- Add authentication and team workspaces.
 
 ---
 
-## 25. Safety and Reliability Notes
+## Safety and Reliability
 
-DevBand includes fallbacks so the demo remains reliable:
+DevBand is designed to be demo-safe:
 
-- If AI/ML API fails, DevBand falls back to deterministic mock output.
-- If Band event posting fails, DevBand falls back to local timeline messages.
-- If AI request limits are reached, DevBand stops calling the AI provider and uses fallback output.
-- Secrets are loaded only from environment variables.
+- AI failures fall back to deterministic mock outputs.
+- Band failures fall back to local timeline messages.
+- AI request limits prevent accidental credit overuse.
+- Secrets are read from environment variables only.
+- `.env` files are ignored by Git.
 
 ---
 
-## 26. License
+## License
 
 This project is intended for hackathon submission and educational demonstration. Add an MIT license file if required by the hackathon submission rules.
 
 ---
 
-## 27. Credits
+## Credits
 
 Built for the Band of Agents Hackathon.
 
@@ -813,6 +869,6 @@ Core technologies:
 
 ---
 
-## 28. Final Project Summary
+## Final Summary
 
-DevBand demonstrates a real enterprise-style multi-agent software delivery workflow. It uses AI agents not as isolated prompt responders, but as collaborating specialists that pass structured context, review each other’s work, trigger revision handoffs, and produce an audit-ready final delivery package through Band.
+DevBand demonstrates a practical enterprise multi-agent software delivery workflow. It uses Band to coordinate specialist agent identities, AI/ML API to generate software delivery outputs, and a full-stack interface to visualize collaboration from feature request to final PR package.

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { buildApiUrl } from "./config/api";
 
 const sampleRequests = [
   "Add a dark mode toggle to a React dashboard and persist selected theme across refreshes",
@@ -500,7 +501,7 @@ function App() {
     setWorkflow(null);
 
     try {
-      const response = await fetch("/api/workflows/start", {
+      const response = await fetch(buildApiUrl("/api/workflows/start"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

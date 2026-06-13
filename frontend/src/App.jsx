@@ -494,6 +494,61 @@ function App() {
   const [workflow, setWorkflow] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [authToken, setAuthToken] = useState(() => {
+    return localStorage.getItem("devband_demo_token") || "";
+  });
+
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
+
+  async function loginToDemo(event) {
+    event.preventDefault();
+
+    setLoginLoading(true);
+    setLoginError("");
+
+    try {
+      const response = await fetch(buildApiUrl("/api/auth/login"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          username: loginUsername,
+          password: loginPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.status === 401) {
+        localStorage.removeItem("devband_demo_token");
+        setAuthToken("");
+        throw new Error("Demo login expired or invalid. Please log in again.");
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed");
+      }
+
+      localStorage.setItem("devband_demo_token", data.token);
+      setAuthToken(data.token);
+      setLoginPassword("");
+    } catch (error) {
+      setLoginError(error.message);
+    } finally {
+      setLoginLoading(false);
+    }
+  }
+
+  function logoutFromDemo() {
+    localStorage.removeItem("devband_demo_token");
+    setAuthToken("");
+    setWorkflow(null);
+    setErrorMessage("");
+  }
 
   async function startWorkflow() {
     setLoading(true);
@@ -504,7 +559,8 @@ function App() {
       const response = await fetch(buildApiUrl("/api/workflows/start"), {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "X-Demo-Token": authToken
         },
         body: JSON.stringify({ featureRequest })
       });
@@ -521,6 +577,74 @@ function App() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!authToken) {
+    return (
+      <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#164e63,transparent_35%),linear-gradient(135deg,#020617,#0f172a_45%,#111827)] px-4 py-8 text-slate-100 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-[85vh] max-w-xl items-center justify-center">
+          <section className="w-full rounded-[2rem] border border-slate-800 bg-slate-950/80 p-8 shadow-2xl shadow-black/30 backdrop-blur">
+            <div className="mb-8">
+              <div className="inline-flex rounded-full border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-200">
+                DevBand Demo Access
+              </div>
+
+              <h1 className="mt-6 text-4xl font-black tracking-tight text-white">
+                DevBand
+              </h1>
+
+              <p className="mt-3 text-sm leading-6 text-slate-300">
+                This demo is protected to prevent unauthorized AI credit usage.
+                Please use the judge credentials provided with the hackathon submission.
+              </p>
+            </div>
+
+            <form onSubmit={loginToDemo} className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  Username
+                </label>
+                <input
+                  value={loginUsername}
+                  onChange={(event) => setLoginUsername(event.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-900 p-4 text-white outline-none ring-cyan-400/30 transition focus:border-cyan-400 focus:ring-4"
+                  placeholder="Enter demo username"
+                  autoComplete="username"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={loginPassword}
+                  onChange={(event) => setLoginPassword(event.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-900 p-4 text-white outline-none ring-cyan-400/30 transition focus:border-cyan-400 focus:ring-4"
+                  placeholder="Enter demo password"
+                  autoComplete="current-password"
+                />
+              </div>
+
+              {loginError && (
+                <div className="rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+                  {loginError}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loginLoading || !loginUsername.trim() || !loginPassword.trim()}
+                className="w-full rounded-2xl bg-cyan-400 px-6 py-3 font-bold text-slate-950 shadow-lg shadow-cyan-950/30 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loginLoading ? "Checking access..." : "Enter DevBand Demo"}
+              </button>
+            </form>
+          </section>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -563,6 +687,13 @@ function App() {
                 AI/ML API powered
               </StatusPill>
               </div>
+              <button
+                onClick={logoutFromDemo}
+                className="rounded-full border border-slate-500/30 bg-slate-500/10 px-3 py-1 text-xs font-medium text-slate-200 transition hover:bg-slate-500/20"
+              >
+                Logout
+              </button>
+
             </div>
 
             <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-5">

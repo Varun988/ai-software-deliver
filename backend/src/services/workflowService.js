@@ -7,13 +7,12 @@ const {
 const { runTestEngineerAgent } = require("../agents/testEngineerAgent");
 const { runCodeReviewerAgent } = require("../agents/codeReviewerAgent");
 const { runDocumentationAgent } = require("../agents/documentationAgent");
-const { createMockBandRoom, postAgentMessageToBand } = require("./bandService");
+const { createBandRoom, postAgentMessageToBand } = require("./bandService");
 
 async function startWorkflow(featureRequest) {
   const workflowId = `wf_${Date.now()}`;
 
-  const room = createMockBandRoom(workflowId, featureRequest);
-
+  const room = await createBandRoom(workflowId, featureRequest);
   const initialContext = {
     workflowId,
     featureRequest,

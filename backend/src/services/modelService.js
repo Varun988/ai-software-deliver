@@ -52,6 +52,40 @@ function buildChatCompletionsUrl(baseUrl) {
   return `${cleanBaseUrl}/v1/chat/completions`;
 }
 
+function decodeHtmlEntities(text) {
+  if (typeof text !== "string") {
+    return text;
+  }
+
+  return text
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&#x2F;/g, "/");
+}
+
+function sanitizeModelOutputDeep(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeModelOutputDeep(item));
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nestedValue]) => [
+        key,
+        sanitizeModelOutputDeep(nestedValue)
+      ])
+    );
+  }
+
+  return decodeHtmlEntities(value);
+}
+
+
+
 function trimPromptIfNeeded(prompt) {
   const maxPromptChars = getNumberEnv("AIML_MAX_PROMPT_CHARS", 12000);
 
@@ -155,8 +189,13 @@ async function callAIMLApi({ agentName, prompt, fallbackOutput }) {
   });
 
   if (aiUsageState.cache.has(cacheKey)) {
+    const cachedOutput = aiUsageState.cache.get(cacheKey);
+    const cleanedCachedOutput = sanitizeModelOutputDeep(cachedOutput);
+
+    aiUsageState.cache.set(cacheKey, cleanedCachedOutput);
+
     return {
-      output: aiUsageState.cache.get(cacheKey),
+      output: cleanedCachedOutput,
       cacheHit: true
     };
   }
@@ -216,12 +255,15 @@ async function callAIMLApi({ agentName, prompt, fallbackOutput }) {
     throw new Error(`Could not parse model output as JSON: ${content}`);
   }
 
-  aiUsageState.cache.set(cacheKey, parsedOutput);
+  const cleanedOutput = sanitizeModelOutputDeep(parsedOutput);
+
+  aiUsageState.cache.set(cacheKey, cleanedOutput);
 
   return {
-    output: parsedOutput,
+    output: cleanedOutput,
     cacheHit: false
   };
+
 }
 
 async function generateWithModel({ agentName, prompt, fallbackOutput }) {

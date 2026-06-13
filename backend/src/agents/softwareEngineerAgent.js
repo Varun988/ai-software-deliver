@@ -70,6 +70,99 @@ export default DevBandFeatureToggle;`,
   };
 }
 
+async function runSoftwareEngineerRevisionAgent(context) {
+  const prompt = `
+You are the Software Engineer Agent in DevBand.
+The Code Reviewer Agent has reviewed your implementation and provided suggestions.
+Create a revised implementation response that addresses the review feedback.
+
+Feature request:
+${context.featureRequest}
+
+Original engineering output:
+${JSON.stringify(context.engineeringOutput.output, null, 2)}
+
+Review output:
+${JSON.stringify(context.reviewOutput.output, null, 2)}
+`;
+
+  const fallbackOutput = {
+    revisionSummary:
+      "Updated the implementation plan to address reviewer feedback around maintainability, accessibility, and safe persistence.",
+    changesApplied: [
+      "Added recommendation to extract persistence logic into a reusable custom hook.",
+      "Kept aria-label support for the interactive control.",
+      "Added validation guidance for localStorage values.",
+      "Clarified that localStorage should only store non-sensitive user preferences."
+    ],
+    revisedCodeSnippet: `import { useEffect, useState } from "react";
+
+function usePersistentBooleanPreference(key, defaultValue = false) {
+  const [value, setValue] = useState(() => {
+    const savedValue = localStorage.getItem(key);
+
+    if (savedValue === "true") return true;
+    if (savedValue === "false") return false;
+
+    return defaultValue;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(key, String(value));
+  }, [key, value]);
+
+  return [value, setValue];
+}
+
+function DevBandFeatureToggle() {
+  const [enabled, setEnabled] = usePersistentBooleanPreference(
+    "devband-feature-enabled",
+    false
+  );
+
+  return (
+    <button
+      type="button"
+      aria-label="Toggle feature preference"
+      onClick={() => setEnabled((current) => !current)}
+    >
+      {enabled ? "Feature Enabled" : "Feature Disabled"}
+    </button>
+  );
+}
+
+export default DevBandFeatureToggle;`,
+    resolvedReviewItems: [
+      "Maintainability improved through reusable hook pattern.",
+      "Accessibility label retained and made more descriptive.",
+      "Invalid persisted values now fall back safely to the default value.",
+      "Security guidance clarified for non-sensitive localStorage usage."
+    ],
+    handoff: {
+      nextAgent: "Documentation Agent",
+      instruction:
+        "Use the revised implementation and review resolution notes to prepare the final PR package."
+    }
+  };
+
+  const modelResult = await generateWithModel({
+    agentName: "Software Engineer Revision Agent",
+    prompt,
+    fallbackOutput
+  });
+
+  return {
+    agent: "Software Engineer Revision Agent",
+    stage: "revision",
+    status: "completed",
+    summary:
+      "Revised the implementation after code review feedback and resolved non-blocking review suggestions.",
+    output: modelResult.output,
+    provider: modelResult.provider
+  };
+}
+
 module.exports = {
-  runSoftwareEngineerAgent
+  runSoftwareEngineerAgent,
+  runSoftwareEngineerRevisionAgent
 };

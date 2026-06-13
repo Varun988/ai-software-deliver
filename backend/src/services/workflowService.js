@@ -1,5 +1,9 @@
 const { runProductPlannerAgent } = require("../agents/productPlannerAgent");
-const { runSoftwareEngineerAgent } = require("../agents/softwareEngineerAgent");
+const {
+  runSoftwareEngineerAgent,
+  runSoftwareEngineerRevisionAgent
+} = require("../agents/softwareEngineerAgent");
+
 const { runTestEngineerAgent } = require("../agents/testEngineerAgent");
 const { runCodeReviewerAgent } = require("../agents/codeReviewerAgent");
 const { runDocumentationAgent } = require("../agents/documentationAgent");
@@ -93,12 +97,38 @@ async function startWorkflow(featureRequest) {
     })
   );
 
-  const documentationOutput = await runDocumentationAgent({
+let revisionOutput = null;
+
+if (
+  reviewOutput.output.revisionRequired === true ||
+  reviewOutput.output.reviewStatus === "approved_with_suggestions"
+) {
+  revisionOutput = await runSoftwareEngineerRevisionAgent({
     ...initialContext,
     planningOutput,
     engineeringOutput,
     testingOutput,
     reviewOutput
+  });
+
+  bandMessages.push(
+    await postAgentMessageToBand({
+      room,
+      agent: revisionOutput.agent,
+      stage: revisionOutput.stage,
+      message: revisionOutput.summary,
+      payload: revisionOutput.output
+    })
+  );
+}
+
+  const documentationOutput = await runDocumentationAgent({
+    ...initialContext,
+    planningOutput,
+    engineeringOutput,
+    testingOutput,
+    reviewOutput,
+    revisionOutput
   });
 
   bandMessages.push(
@@ -134,6 +164,7 @@ async function startWorkflow(featureRequest) {
       engineeringOutput,
       testingOutput,
       reviewOutput,
+      ...(revisionOutput ? [revisionOutput] : []),
       documentationOutput
     ],
     bandMessages,

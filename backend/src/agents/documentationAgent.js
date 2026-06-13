@@ -19,6 +19,9 @@ ${JSON.stringify(context.testingOutput.output, null, 2)}
 
 Review output:
 ${JSON.stringify(context.reviewOutput.output, null, 2)}
+
+Revision output:
+${JSON.stringify(context.revisionOutput?.output || null, null, 2)}
 `;
 
   const fallbackOutput = {
@@ -27,13 +30,15 @@ ${JSON.stringify(context.reviewOutput.output, null, 2)}
     developerNotes: [
       "The implementation uses React state for immediate UI updates.",
       "The implementation uses localStorage for lightweight persistence.",
+      "The reviewer suggestions were handled through an engineer revision loop.",
       "The feature should be reviewed again if persistence requirements become more complex."
     ],
     releaseNotes: [
       "Added a new user-facing feature control.",
       "Added persistence-friendly behavior for user preference.",
       "Prepared test scenarios and QA checklist for validation.",
-      "Completed code review with no blocking issues."
+      "Completed code review with no blocking issues.",
+      "Resolved review suggestions through a revision handoff before final documentation."
     ],
     readmeUpdate: `## New Feature
 

@@ -12,6 +12,7 @@ const stageStyles = {
   implementation: "bg-purple-500/15 text-purple-200 border-purple-400/30",
   testing: "bg-amber-500/15 text-amber-200 border-amber-400/30",
   review: "bg-emerald-500/15 text-emerald-200 border-emerald-400/30",
+  revision: "bg-orange-500/15 text-orange-200 border-orange-400/30",
   documentation: "bg-pink-500/15 text-pink-200 border-pink-400/30",
   start: "bg-slate-500/15 text-slate-200 border-slate-400/30",
   completed: "bg-green-500/15 text-green-200 border-green-400/30"
